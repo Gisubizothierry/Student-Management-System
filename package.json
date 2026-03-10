@@ -1,0 +1,35 @@
+{
+  "name": "student-management",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20",
+    "@fullcalendar/vue3": "^6.1.20",
+    "@vueuse/motion": "^2.0.0",
+    "axios": "^1.6.0",
+    "chart.js": "^4.5.1",
+    "html2pdf.js": "^0.14.0",
+    "jspdf": "^4.2.0",
+    "lucide-vue-next": "^0.263.0",
+    "pinia": "^2.1.0",
+    "vue": "^3.3.0",
+    "vue-chartjs": "^5.3.3",
+    "vue-router": "^4.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^4.0.0-alpha",
+    "vite": "^4.0.0"
+  }
+}
