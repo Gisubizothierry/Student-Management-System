@@ -38,7 +38,7 @@
 
           <!-- Profile Info -->
           <div class="flex-1 text-center md:text-left">
-            <!-- Username and Edit Button -->
+            <!-- Username and Actions -->
             <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
               <h1 class="text-2xl font-light">{{ user.name }}</h1>
               <div class="flex gap-2">
@@ -55,6 +55,12 @@
                   variant="outline"
                   size="sm"
                   icon="Settings"
+                />
+                <Button
+                  @click="showShareModal = true"
+                  variant="outline"
+                  size="sm"
+                  icon="Share"
                 />
               </div>
             </div>
@@ -99,26 +105,22 @@
       <div class="px-4 md:px-8 pb-6">
         <div class="flex gap-4 overflow-x-auto pb-2">
           <!-- Add Story Button -->
-          <div class="flex flex-col items-center gap-2 cursor-pointer">
-            <div class="w-16 h-16 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
+          <div class="flex flex-col items-center gap-2 cursor-pointer group">
+            <div class="w-16 h-16 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center group-hover:border-gray-400 transition-colors">
               <Plus class="w-6 h-6 text-gray-600" />
             </div>
             <span class="text-xs text-gray-600">Add Story</span>
           </div>
 
           <!-- Story Highlights -->
-          <div
+          <StoryHighlight
             v-for="highlight in highlights"
             :key="highlight.id"
-            class="flex flex-col items-center gap-2 cursor-pointer"
-          >
-            <div class="w-16 h-16 rounded-full border-2 border-pink-500 p-0.5">
-              <div class="w-full h-full rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center">
-                <span class="text-white text-lg">{{ highlight.emoji }}</span>
-              </div>
-            </div>
-            <span class="text-xs text-gray-600">{{ highlight.title }}</span>
-          </div>
+            :title="highlight.title"
+            :emoji="highlight.emoji"
+            :has-unseen="highlight.hasUnseen"
+            :color="highlight.color"
+          />
         </div>
       </div>
 
@@ -149,33 +151,12 @@
           <p class="text-gray-500">Share your first post to get started!</p>
         </div>
         <div v-else class="grid grid-cols-3 gap-1 md:gap-4 p-1 md:p-4">
-          <div
+          <PostCard
             v-for="post in userPosts"
             :key="post.id"
-            v-motion
-            :initial="{ opacity: 0, scale: 0.8 }"
-            :enter="{ opacity: 1, scale: 1 }"
-            class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group"
+            :post="post"
             @click="openPostModal(post)"
-          >
-            <img
-              :src="post.image"
-              :alt="post.caption"
-              class="w-full h-full object-cover"
-            />
-            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-              <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-6 text-white">
-                <div class="flex items-center gap-1">
-                  <Heart class="w-5 h-5" />
-                  <span class="font-semibold">{{ post.likes }}</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <MessageCircle class="w-5 h-5" />
-                  <span class="font-semibold">{{ post.comments }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          />
         </div>
       </div>
 
@@ -308,6 +289,8 @@ import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
 import Modal from '@/components/common/Modal.vue'
 import PhotoUpload from '@/components/common/PhotoUpload.vue'
+import StoryHighlight from '@/components/features/StoryHighlight.vue'
+import PostCard from '@/components/features/PostCard.vue'
 
 // Stores
 const authStore = useAuthStore()
@@ -347,10 +330,12 @@ const tabs = [
 
 // Mock data
 const highlights = [
-  { id: 1, title: 'School', emoji: '🎓' },
-  { id: 2, title: 'Sports', emoji: '⚽' },
-  { id: 3, title: 'Achievements', emoji: '🏆' },
-  { id: 4, title: 'Friends', emoji: '👥' }
+  { id: 1, title: 'School', emoji: '🎓', hasUnseen: false, color: 'blue' },
+  { id: 2, title: 'Sports', emoji: '⚽', hasUnseen: true, color: 'green' },
+  { id: 3, title: 'Achievements', emoji: '🏆', hasUnseen: false, color: 'yellow' },
+  { id: 4, title: 'Friends', emoji: '👥', hasUnseen: false, color: 'purple' },
+  { id: 5, title: 'Projects', emoji: '💼', hasUnseen: true, color: 'red' },
+  { id: 6, title: 'Events', emoji: '🎉', hasUnseen: false, color: 'gradient' }
 ]
 
 const userPosts = [
@@ -360,7 +345,8 @@ const userPosts = [
     caption: 'Back to school! 📚 #FirstDay #StudentLife',
     likes: 24,
     comments: 5,
-    date: new Date(Date.now() - 86400000)
+    date: new Date(Date.now() - 86400000),
+    type: 'image'
   },
   {
     id: 2,
@@ -368,7 +354,8 @@ const userPosts = [
     caption: 'Study session complete! 💪 #StudyMotivation',
     likes: 18,
     comments: 3,
-    date: new Date(Date.now() - 172800000)
+    date: new Date(Date.now() - 172800000),
+    type: 'image'
   },
   {
     id: 3,
@@ -376,7 +363,8 @@ const userPosts = [
     caption: 'Group project time! 👥 #TeamWork',
     likes: 31,
     comments: 8,
-    date: new Date(Date.now() - 259200000)
+    date: new Date(Date.now() - 259200000),
+    type: 'image'
   },
   {
     id: 4,
@@ -384,7 +372,8 @@ const userPosts = [
     caption: 'Library vibes 📖 #Reading',
     likes: 15,
     comments: 2,
-    date: new Date(Date.now() - 345600000)
+    date: new Date(Date.now() - 345600000),
+    type: 'image'
   },
   {
     id: 5,
@@ -392,7 +381,8 @@ const userPosts = [
     caption: 'Science experiment day! 🔬 #STEM',
     likes: 27,
     comments: 6,
-    date: new Date(Date.now() - 432000000)
+    date: new Date(Date.now() - 432000000),
+    type: 'image'
   },
   {
     id: 6,
@@ -400,7 +390,35 @@ const userPosts = [
     caption: 'Sports day! 🏃‍♂️ #Fitness',
     likes: 42,
     comments: 12,
-    date: new Date(Date.now() - 518400000)
+    date: new Date(Date.now() - 518400000),
+    type: 'image'
+  },
+  {
+    id: 7,
+    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400',
+    caption: 'Class presentation ready! 🎤 #PublicSpeaking',
+    likes: 19,
+    comments: 4,
+    date: new Date(Date.now() - 604800000),
+    type: 'image'
+  },
+  {
+    id: 8,
+    image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400',
+    caption: 'Art class masterpiece! 🎨 #Creativity',
+    likes: 35,
+    comments: 9,
+    date: new Date(Date.now() - 691200000),
+    type: 'image'
+  },
+  {
+    id: 9,
+    image: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=400',
+    caption: 'Music practice session 🎵 #Music',
+    likes: 22,
+    comments: 3,
+    date: new Date(Date.now() - 777600000),
+    type: 'video'
   }
 ]
 
